@@ -1,6 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
 const schemas = require('../../schemas');
-const taskServices = require('../../services/tasks');
+const tasksServices = require('../../services/tasks');
 
 module.exports = async (req, res, next) => {
   try {
@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
       return next(error);
     }
 
-    const { updatedTask, updateError } = await taskServices.update(id, { description, status });
+    const { updatedTask, updateError } = await tasksServices.update(id, { description, status });
 
     if (updateError) {
       return next(updateError);

@@ -510,3 +510,119 @@ describe('3 - PUT /tasks', () => {
     });
   });
 });
+
+describe('4 - DELETE /tasks', () => {
+  let connectionMock;
+  let db;
+
+  before(async () => {
+    connectionMock = await connection();
+
+    sinon.stub(MongoClient, 'connect').resolves(connectionMock);
+
+    db = connectionMock.db(DB_NAME);
+  });
+
+  after(async () => {
+    MongoClient.connect.restore();
+    await db.collection('tasks').deleteMany({});
+  });
+
+  describe('Quando ocorre um erro interno', () => {
+    const internalError = { message: 'Internal Server Error' };
+
+    let response;
+
+    before(async () => {
+      stub(tasksServices, 'remove').rejects();
+
+      response = await chai.request(app)
+        .delete('/tasks/1');
+    });
+
+    after(() => {
+      tasksServices.remove.restore();
+    });
+
+    it('Retorna status 500', () => {
+      expect(response).to.have.status(500);
+    });
+
+    it('Retorna objeto com mensagem de erro "Internal Server Error"', () => {
+      expect(response.body).to.be.deep.equal(internalError);
+    });
+  });
+
+  describe(('Quando o id informado é inválido'), () => {
+    const invalidId = { message: 'Id inválido' };
+
+    let response = {};
+
+    before(async () => {
+      response = await chai.request(app)
+        .delete('/tasks/1');
+    });
+
+    after(async () => {
+      await db.collection('tasks').deleteMany({});
+    });
+
+    it('Retorna status 400', () => {
+      expect(response).to.have.status(400);
+    });
+
+    it('Retorna objeto com mensagem de erro "Id inválido"', () => {
+      expect(response.body).to.be.deep.equal(invalidId);
+    });
+  });
+
+  describe(('Quando a task informada não existe'), () => {
+    const taskNotFound = { message: 'Tarefa não encontrada' };
+
+    let response = {};
+
+    before(async () => {
+      response = await chai.request(app)
+        .delete('/tasks/620a81a47b50e2e00ca81772');
+    });
+
+    after(async () => {
+      await db.collection('tasks').deleteMany({});
+    });
+
+    it('Retorna status 404', () => {
+      expect(response).to.have.status(404);
+    });
+
+    it('Retorna objeto com mensagem de erro "Tarefa não encontrada"', () => {
+      expect(response.body).to.be.deep.equal(taskNotFound);
+    });
+  });
+
+  describe(('Quando a task informada é válida'), () => {
+    const task1 = { description: 'Fazer compras', status: 'Pendente' };
+
+    let response = {};
+
+    before(async () => {
+      const { insertedId } = await db.collection('tasks').insertOne(task1);
+
+      response = await chai.request(app)
+        .delete(`/tasks/${insertedId}`);
+    });
+
+    after(async () => {
+      await db.collection('tasks').deleteMany({});
+    });
+
+    it('Retorna status 204', () => {
+      expect(response).to.have.status(204);
+    });
+
+    it('Remove do banco e retorna sem conteúdo', async () => {
+      const tasks = await db.collection('tasks').find({}).toArray();
+      expect(tasks).to.be.deep.equal([]);
+      expect(response.body).to.be.deep.equal({});
+    });
+  });
+});

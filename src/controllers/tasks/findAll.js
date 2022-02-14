@@ -1,9 +1,9 @@
 const { StatusCodes } = require('http-status-codes');
-const taskServices = require('../../services/tasks');
+const tasksServices = require('../../services/tasks');
 
 module.exports = async (_req, res, next) => {
   try {
-    const tasks = await taskServices.findAll();
+    const tasks = await tasksServices.findAll();
 
     return res.status(StatusCodes.OK).json({ tasks });
   } catch (error) {
