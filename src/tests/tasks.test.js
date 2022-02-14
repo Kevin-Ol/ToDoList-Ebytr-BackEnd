@@ -135,7 +135,11 @@ describe('1 - POST /tasks', () => {
 
     it('Retorna objeto com a task inserida', async () => {
       const dbTask = await db.collection('tasks').findOne({ description: 'Fazer compras' });
-      const task = { ...dbTask, _id: dbTask._id.toString() };
+      const task = {
+        ...dbTask,
+        _id: dbTask._id.toString(),
+        createdAt: dbTask.createdAt.toISOString(),
+      };
       expect(response.body).to.be.deep.equal({ task });
     });
   });
@@ -184,8 +188,17 @@ describe('2 - GET /tasks', () => {
   });
 
   describe(('Retorna todas as tasks'), () => {
-    const task1 = { description: 'Fazer compras', status: 'Pendente' };
-    const task2 = { description: 'Limpar o quarto', status: 'Pendente' };
+    const task1 = {
+      description: 'Fazer compras',
+      status: 'Pendente',
+      createdAt: (new Date()).toISOString(),
+    };
+
+    const task2 = {
+      description: 'Limpar o quarto',
+      status: 'Pendente',
+      createdAt: (new Date()).toISOString(),
+    };
 
     let response = {};
 
@@ -444,8 +457,9 @@ describe('3 - PUT /tasks', () => {
 
   describe(('Quando apenas description é enviado'), () => {
     let taskId;
-    const task1 = { description: 'Fazer compras', status: 'Pendente' };
-    const expectedTask = { description: 'Limpar o quarto', status: 'Pendente' };
+    const createdAt = (new Date()).toISOString();
+    const task1 = { description: 'Fazer compras', status: 'Pendente', createdAt };
+    const expectedTask = { description: 'Limpar o quarto', status: 'Pendente', createdAt };
 
     let response = {};
 
@@ -478,8 +492,9 @@ describe('3 - PUT /tasks', () => {
 
   describe(('Quando apenas status é enviado'), () => {
     let taskId;
-    const task1 = { description: 'Fazer compras', status: 'Pendente' };
-    const expectedTask = { description: 'Fazer compras', status: 'Em andamento' };
+    const createdAt = (new Date()).toISOString();
+    const task1 = { description: 'Fazer compras', status: 'Pendente', createdAt };
+    const expectedTask = { description: 'Fazer compras', status: 'Em andamento', createdAt };
 
     let response = {};
 

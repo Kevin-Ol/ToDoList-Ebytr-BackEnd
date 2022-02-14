@@ -1,7 +1,9 @@
 const tasksModel = require('../../model/tasks');
 
 module.exports = async ({ description, status = 'Pendente' }) => {
-  const task = await tasksModel.create({ description, status });
+  const createdAt = new Date();
+
+  const task = await tasksModel.create({ description, status, createdAt });
 
   return task;
 };
