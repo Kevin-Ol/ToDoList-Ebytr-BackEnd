@@ -1,9 +1,9 @@
+const Joi = require('joi');
 const { StatusCodes } = require('http-status-codes');
 
 module.exports = (err, _req, res, _next) => {
-  if (err.code) {
-    const { code, message } = err;
-    return res.status(code).json({ message });
+  if (Joi.isError(err)) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: err.message });
   }
 
   console.log(err);
