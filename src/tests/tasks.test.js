@@ -140,3 +140,70 @@ describe('1 - POST /tasks', () => {
     });
   });
 });
+
+describe('2 - GET /tasks', () => {
+  let connectionMock;
+  let db;
+
+  before(async () => {
+    connectionMock = await connection();
+
+    sinon.stub(MongoClient, 'connect').resolves(connectionMock);
+
+    db = connectionMock.db(DB_NAME);
+  });
+
+  after(async () => {
+    MongoClient.connect.restore();
+    await db.collection('tasks').deleteMany({});
+  });
+
+  describe('Quando ocorre um erro interno', () => {
+    const internalError = { message: 'Internal Server Error' };
+
+    let response;
+
+    before(async () => {
+      stub(tasksServices, 'findAll').rejects();
+
+      response = await chai.request(app)
+        .get('/tasks');
+    });
+
+    after(() => {
+      tasksServices.findAll.restore();
+    });
+
+    it('Retorna status 500', () => {
+      expect(response).to.have.status(500);
+    });
+
+    it('Retorna objeto com mensagem de erro Internal Server Error', () => {
+      expect(response.body).to.be.deep.equal(internalError);
+    });
+  });
+
+  describe(('Retornas todas as tasks'), () => {
+    const task1 = { description: 'Fazer compras', status: 'Pendente' };
+    const task2 = { description: 'Limpar o quarto', status: 'Pendente' };
+
+    let response = {};
+
+    before(async () => {
+      await db.collection('tasks').insertMany([task1, task2]);
+
+      response = await chai.request(app)
+        .get('/tasks');
+    });
+
+    it('Retorna status 200', () => {
+      expect(response).to.have.status(200);
+    });
+
+    it('Retorna objeto com as task do banco', async () => {
+      const dbTask = await db.collection('tasks').find({}).toArray();
+      const dbTasks = dbTask.map(({ _id, ...info }) => ({ _id: _id.toString(), ...info }));
+      expect(response.body).to.be.deep.equal({ tasks: dbTasks });
+    });
+  });
+});
