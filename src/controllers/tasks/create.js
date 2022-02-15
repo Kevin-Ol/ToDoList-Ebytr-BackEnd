@@ -4,15 +4,15 @@ const schemas = require('../../schemas');
 
 module.exports = async (req, res, next) => {
   try {
-    const { description } = req.body;
-
-    const { error } = schemas.createTask.validate({ description });
+    const { description, status, createdAt } = req.body;
+    console.log(req.body);
+    const { error } = schemas.createTask.validate({ description, status, createdAt });
 
     if (error) {
       return next(error);
     }
 
-    const task = await tasksServices.create({ description });
+    const task = await tasksServices.create({ description, status, createdAt });
 
     return res.status(StatusCodes.CREATED).json({ task });
   } catch (error) {
