@@ -1,4 +1,4 @@
-# Desafio Raro Labs
+# Desafio Ebytr
 
 API desenvolvida em NodeJS para o desafio técnico do processo seletivo de Pessoa Desenvolvedora Nodejs na empresa Raro Labs.
 
