@@ -1,6 +1,6 @@
 # Desafio Ebytr
 
-API desenvolvida em NodeJS para o desafio técnico do processo seletivo de Pessoa Desenvolvedora Nodejs na empresa Raro Labs.
+API desenvolvida em NodeJS para o desafio técnico do processo seletivo de Pessoa Desenvolvedora FullStack na empresa Ebytr.
 
 A API consiste em rotas POST, GET, PUT e DELETE no domínio http://localhost:3001/tasks , onde o usuário pode criar, atualizar, visualizar e remover tarefas 
 cadastradas em um banco de dados não relacional MongoDB. A API foi testada utilizando testes de integração com as bibliotecas mocha, chai e sinon.
