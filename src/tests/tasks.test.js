@@ -94,8 +94,8 @@ describe('1 - POST /tasks', () => {
     });
   });
 
-  describe('Quando ocorre um erro interno', () => {
-    const internalError = { message: 'Internal Server Error' };
+  describe('Quando o campo status não é enviado', () => {
+    const statusRequired = { message: 'Campo status é obrigatório' };
 
     let response;
 
@@ -111,6 +111,141 @@ describe('1 - POST /tasks', () => {
       tasksServices.create.restore();
     });
 
+    it('Retorna status 400', () => {
+      expect(response).to.have.status(400);
+    });
+
+    it('Retorna objeto com mensagem de erro "Campo status é obrigatório"', () => {
+      expect(response.body).to.be.deep.equal(statusRequired);
+    });
+  });
+
+  describe('Quando o campo status é enviado vazio', () => {
+    const statusEmpty = { message: 'Campo status não pode ser vazio' };
+
+    let response;
+
+    before(async () => {
+      stub(tasksServices, 'create').rejects();
+
+      response = await chai.request(app)
+        .post('/tasks')
+        .send({ description: 'Fazer compras', status: '' });
+    });
+
+    after(() => {
+      tasksServices.create.restore();
+    });
+
+    it('Retorna status 400', () => {
+      expect(response).to.have.status(400);
+    });
+
+    it('Retorna objeto com mensagem de erro "Campo status não pode ser vazio"', () => {
+      expect(response.body).to.be.deep.equal(statusEmpty);
+    });
+  });
+
+  describe('Quando o campo status não é uma string', () => {
+    const statusString = { message: 'Campo status deve ser uma string' };
+
+    let response;
+
+    before(async () => {
+      stub(tasksServices, 'create').rejects();
+
+      response = await chai.request(app)
+        .post('/tasks')
+        .send({ description: 'Fazer compras', status: 2 });
+    });
+
+    after(() => {
+      tasksServices.create.restore();
+    });
+
+    it('Retorna status 400', () => {
+      expect(response).to.have.status(400);
+    });
+
+    it('Retorna objeto com mensagem de erro "Campo status deve ser uma string"', () => {
+      expect(response.body).to.be.deep.equal(statusString);
+    });
+  });
+
+  describe('Quando o campo createdAt não é enviado', () => {
+    const createdAtRequired = { message: 'Campo createdAt é obrigatório' };
+
+    let response;
+
+    before(async () => {
+      stub(tasksServices, 'create').rejects();
+
+      response = await chai.request(app)
+        .post('/tasks')
+        .send({ description: 'Fazer compras', status: 'Pendente' });
+    });
+
+    after(() => {
+      tasksServices.create.restore();
+    });
+
+    it('Retorna status 400', () => {
+      expect(response).to.have.status(400);
+    });
+
+    it('Retorna objeto com mensagem de erro "Campo createdAt é obrigatório"', () => {
+      expect(response.body).to.be.deep.equal(createdAtRequired);
+    });
+  });
+
+  describe('Quando o campo createdAt não é uma data no formato ISO', () => {
+    const createdAtIsoDate = { message: 'Campo createdAt deve ser uma data no formato iso' };
+
+    let response;
+
+    before(async () => {
+      stub(tasksServices, 'create').rejects();
+
+      response = await chai.request(app)
+        .post('/tasks')
+        .send({ description: 'Fazer compras', status: 'Pendente', createdAt: '12/12/2012' });
+    });
+
+    after(() => {
+      tasksServices.create.restore();
+    });
+
+    it('Retorna status 400', () => {
+      expect(response).to.have.status(400);
+    });
+
+    it('Retorna objeto com mensagem de erro "Campo createdAt deve ser uma data no formato iso"', () => {
+      expect(response.body).to.be.deep.equal(createdAtIsoDate);
+    });
+  });
+
+  describe('Quando ocorre um erro interno', () => {
+    const internalError = { message: 'Internal Server Error' };
+    const expectedTask = {
+      description: 'Fazer compras',
+      status: 'Pendente',
+      createdAt: '2022-02-16T21:30:38.596Z',
+    };
+
+    let response;
+
+    before(async () => {
+      stub(tasksServices, 'create').rejects();
+
+      response = await chai.request(app)
+        .post('/tasks')
+        .send(expectedTask);
+    });
+
+    after(() => {
+      tasksServices.create.restore();
+    });
+
     it('Retorna status 500', () => {
       expect(response).to.have.status(500);
     });
@@ -120,13 +255,18 @@ describe('1 - POST /tasks', () => {
     });
   });
 
-  describe(('Quando o campo description é válido'), () => {
+  describe(('Quando os campos são válidos'), () => {
     let response = {};
+    const expectedTask = {
+      description: 'Fazer compras',
+      status: 'Pendente',
+      createdAt: '2022-02-16T21:30:38.596Z',
+    };
 
     before(async () => {
       response = await chai.request(app)
         .post('/tasks')
-        .send({ description: 'Fazer compras' });
+        .send(expectedTask);
     });
 
     it('Retorna status 201', () => {
@@ -138,7 +278,6 @@ describe('1 - POST /tasks', () => {
       const task = {
         ...dbTask,
         _id: dbTask._id.toString(),
-        createdAt: dbTask.createdAt.toISOString(),
       };
       expect(response.body).to.be.deep.equal({ task });
     });

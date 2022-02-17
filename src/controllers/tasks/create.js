@@ -5,7 +5,7 @@ const schemas = require('../../schemas');
 module.exports = async (req, res, next) => {
   try {
     const { description, status, createdAt } = req.body;
-    console.log(req.body);
+
     const { error } = schemas.createTask.validate({ description, status, createdAt });
 
     if (error) {
