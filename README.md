@@ -209,6 +209,14 @@ uma mensagem de erro como o exemplo abaixo:
 
 ---
 
+## Arquitetura
+
+Foi seguido o modelo MSC (Model, Service, Controller) juntamente com pastas auxiliares a seguir:
+
+![estrutura-back](https://user-images.githubusercontent.com/82068881/154405891-c811a2e8-5205-4b95-b6d0-7b54310b2a70.png)
+
+
+
 ## Scripts do projeto
 
 - `npm start` inicia a aplicação localmente;
